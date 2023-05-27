@@ -1,0 +1,40 @@
+
+client.on("message", async (message) => {
+        if (message.member.hasPermission("MANAGE_GUILD")) return;
+        if (message.author.bot) return;
+        if (!message.guild) return;
+        
+        const mesaj = await message.channel.messages.fetch({ limit: 5 });
+        var floodChecker = mesaj.filter(m => m.author.id == message.author.id).size;
+
+        if (floodChecker >= 5) {
+            const messages = await message.channel.messages.fetch({ limit: 5 });
+            var bulkDelete = await messages.filter(m => m.author.id === message.author.id && !m.author.bot);
+
+            let kelimeler = [];
+            await bulkDelete.sort().forEach(async (a, index) => {
+                if (a.attachments.size > 0) {
+                    return await kelimeler.push(`${a.content == "" ? a.attachments.map(x => `» ${x.proxyURL}`) : `» ${a.content}`}`)
+                }
+
+                kelimeler.push(`» ${a.content}`);
+            });
+                await message.channel.bulkDelete(bulkDelete, true)
+                
+
+                
+                const spamEmbed = new Discord.MessageEmbed()
+                 .setColor("7085ce")
+                 .setAuthor(message.author.tag + " uyarıldı", message.author.avatarURL({ dynamic: true }))
+                 .setDescription(`**Sebep:** Flood Sebebiyle `)
+                  message.channel.send(spamEmbed).then(msg => setTimeout(() => msg.delete(), 15000))
+    
+                  const embed = new Discord.MessageEmbed()
+                  .setColor("RED")
+                  .setDescription(`» Başarılı! ✅\n${member} adlı kullanıcıya susturma uygulandı\n» Ceza Sebebi \`Flood\`\n» Ceza Süresi \`5 Saat\``)
+                  .setAuthor(message.author.tag, message.author.displayAvatarURL({ dynamic: true }))
+                  .setFooter(`${moment(Date.now()).format("LLL")}`)
+                  
+            
+       // await message.member.timeout(18000000, `Flood yaptı.`)
+        }})
